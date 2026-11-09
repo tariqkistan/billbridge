@@ -1,5 +1,9 @@
 # billbridge
 
+[![CI Status](https://github.com/tariqkistan/billbridge/actions/workflows/ci.yml/badge.svg)](https://github.com/tariqkistan/billbridge/actions/workflows/ci.yml)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 An AI agent that resolves telecom bill disputes against a deliberately messy simulated legacy backend.
 
 A customer asks why their bill went up or whether a payment landed. The agent verifies who they are, pulls data from unreliable legacy systems, explains the charges using only facts the systems returned, and hands off to a human with full context when it cannot resolve the issue.
