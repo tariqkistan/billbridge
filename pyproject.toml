@@ -1,0 +1,47 @@
+[project]
+name = 'billbridge'
+version = '0.1.0'
+description = 'Bill-dispute resolution agent against a simulated legacy backend'
+requires-python = '>=3.11'
+dependencies = [
+  'openai>=1.40',
+  'fastapi',
+  'uvicorn',
+  'httpx',
+  'pydantic>=2.0',
+  'python-dotenv',
+  'structlog',
+  'pyyaml',
+]
+
+[project.optional-dependencies]
+dev = ['pytest', 'pytest-asyncio', 'pytest-cov', 'ruff', 'mypy', 'types-PyYAML']
+
+[build-system]
+requires = ['setuptools>=68']
+build-backend = 'setuptools.build_meta'
+
+[tool.setuptools.packages.find]
+where = ['src']
+
+[tool.pytest.ini_options]
+asyncio_mode = 'auto'
+asyncio_default_fixture_loop_scope = 'function'
+testpaths = ['tests']
+pythonpath = ['.', 'src']
+markers = ['eval: runs against a real LLM (slow, needs a key)']
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.ruff]
+line-length = 110
+target-version = 'py311'
+
+[tool.ruff.lint]
+select = ['E', 'F', 'I', 'B', 'UP']
+ignore = ['B904']
+per-file-ignores = {'src/billbridge/agent.py' = ['E501']}  # the system prompt reads better unwrapped
+
+[tool.coverage.run]
+source = ['billbridge', 'legacy_sim']

@@ -1,0 +1,13 @@
+services:
+  legacy:
+    build: .
+    command: uvicorn legacy_sim.app:app --host 0.0.0.0 --port 9000
+    ports: ['9000:9000']
+  api:
+    build: .
+    env_file: .env
+    environment:
+      LEGACY_BASE_URL: http://legacy:9000
+      EVENTS_DB: /tmp/billbridge_events.db
+    ports: ['8000:8000']
+    depends_on: [legacy]
