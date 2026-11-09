@@ -1,4 +1,8 @@
-# billbridge
+# Billbridge
+
+[![CI Status](https://github.com/tariqkistan/billbridge/actions/workflows/ci.yml/badge.svg)](https://github.com/tariqkistan/billbridge/actions/workflows/ci.yml)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 An AI agent that resolves telecom bill disputes against a deliberately messy simulated legacy backend.
 
