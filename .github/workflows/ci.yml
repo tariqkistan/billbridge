@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: lint, types, tests (py${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - run: pip install -e '.[dev]'
+      - run: ruff check .
+      - run: mypy src legacy_sim scripts
+      - name: Unit, gate and agent-loop tests (no model key needed)
+        run: pytest -m "not eval" --cov --cov-report=term-missing --cov-fail-under=85
+
+  scenarios:
+    # The eval gate: the scenario suite against a real model. Runs on main and
+    # on manual dispatch, and only when a model key is configured as a secret.
+    name: scenario eval gate
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+      AZURE_OPENAI_KEY: ${{ secrets.AZURE_OPENAI_KEY }}
+      AZURE_OPENAI_DEPLOYMENT: ${{ vars.AZURE_OPENAI_DEPLOYMENT || 'gpt-4o' }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      EVENTS_DB: ./scenario_events.db
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: pip install -e '.[dev]'
+      - name: Check for a model key
+        id: key
+        run: |
+          if [ -n "$AZURE_OPENAI_KEY" ] || [ -n "$OPENAI_API_KEY" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No model key secret configured; scenario eval gate skipped."
+          fi
+      - name: Run scenarios (fails below 90% pass rate)
+        if: steps.key.outputs.present == 'true'
+        run: python -m scripts.run_scenarios --min-pass-rate 0.9 --out results/scenarios.json
+      - name: Metrics from the scenario run
+        if: always() && steps.key.outputs.present == 'true'
+        run: python -m scripts.report
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.key.outputs.present == 'true'
+        with:
+          name: scenario-results
+          path: results/
