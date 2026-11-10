@@ -11,6 +11,8 @@ A customer asks why their bill went up or whether a payment landed. The agent ve
 
 ## Architecture
 
+![billbridge](docs/Billbridge_ AI Telecom Support Dashboard.png)
+
 ```mermaid
 flowchart LR
     C[Customer] -->|session_id, message| API[FastAPI /chat]
